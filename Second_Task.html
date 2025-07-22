@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Employee Management System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #202040;
+      color: #fff;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    form {
+      background: #2d2d5a;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      max-width: 500px;
+      margin: auto;
+    }
+
+    input {
+      padding: 10px;
+      margin: 10px;
+      width: 90%;
+      border-radius: 5px;
+      border: none;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      border: none;
+      background-color: #00d4ff;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    table {
+      width: 90%;
+      margin: 20px auto;
+      background: #333;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #444;
+      text-align: center;
+    }
+
+    th {
+      background-color: #555;
+    }
+
+    .action-btn {
+      margin: 5px;
+      background-color: #ffaa00;
+    }
+
+    .delete-btn {
+      background-color: #ff4d4d;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Employee Management System</h2>
+
+  <form id="employeeForm">
+    <input type="text" id="empName" placeholder="Employee Name" required>
+    <input type="text" id="empRole" placeholder="Role" required>
+    <input type="number" id="empSalary" placeholder="Salary" required>
+    <button type="submit" id="submitBtn">Add Employee</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Role</th>
+        <th>Salary</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="employeeTableBody">
+    </tbody>
+  </table>
+
+  <script>
+    let employees = JSON.parse(localStorage.getItem("employees")) || [];
+    let editIndex = null;
+
+    const form = document.getElementById("employeeForm");
+    const tableBody = document.getElementById("employeeTableBody");
+    const submitBtn = document.getElementById("submitBtn");
+
+    function renderTable() {
+      tableBody.innerHTML = "";
+      employees.forEach((emp, index) => {
+        const row = `
+          <tr>
+            <td>${emp.name}</td>
+            <td>${emp.role}</td>
+            <td>${emp.salary}</td>
+            <td>
+              <button class="action-btn" onclick="editEmployee(${index})">Edit</button>
+              <button class="action-btn delete-btn" onclick="deleteEmployee(${index})">Delete</button>
+            </td>
+          </tr>
+        `;
+        tableBody.innerHTML += row;
+      });
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const name = document.getElementById("empName").value.trim();
+      const role = document.getElementById("empRole").value.trim();
+      const salary = document.getElementById("empSalary").value.trim();
+
+      if (name === "" || role === "" || salary === "") {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      const employee = { name, role, salary };
+
+      if (editIndex === null) {
+        employees.push(employee);
+      } else {
+        employees[editIndex] = employee;
+        editIndex = null;
+        submitBtn.textContent = "Add Employee";
+      }
+
+      localStorage.setItem("employees", JSON.stringify(employees));
+      form.reset();
+      renderTable();
+    });
+
+    function editEmployee(index) {
+      const emp = employees[index];
+      document.getElementById("empName").value = emp.name;
+      document.getElementById("empRole").value = emp.role;
+      document.getElementById("empSalary").value = emp.salary;
+      editIndex = index;
+      submitBtn.textContent = "Update Employee";
+    }
+
+    function deleteEmployee(index) {
+      if (confirm("Are you sure you want to delete this employee?")) {
+        employees.splice(index, 1);
+        localStorage.setItem("employees", JSON.stringify(employees));
+        renderTable();
+      }
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>
